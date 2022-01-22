@@ -42,22 +42,4 @@ class Model implements IIndexable {
     }
 }
 
-class SomeDocument extends Model {
-
-    constructor(
-        public DocCode: string,
-        public DocName: string,
-        public IsSomeFlag: boolean,
-    ) {
-        super()
-
-        this.addValidation('DocName', (v, m) => {
-            console.log('aaa', v, m)
-
-            return 'required';
-        })
-    }
-}
-
-const someDocument = new SomeDocument('12', 'Решение суда о чем-нибудь', true);
-console.log((someDocument as any).__getFormHelpers('someDocument'));
+export default Model;

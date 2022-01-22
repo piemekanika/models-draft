@@ -1,44 +1,79 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-typescript" target="_blank" rel="noopener">typescript</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-vuex" target="_blank" rel="noopener">vuex</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+    <div class="hello">
+        <nw-form :model="someDocument" ref="form">
+            <nw-form-line
+                label="doc name"
+                model-value="DocName"
+            ></nw-form-line>
+
+            <input v-model="someDocument.IsSomeFlag" type="checkbox">
+
+            {{ someDocument.DocName }}
+        </nw-form>
+
+        <button @click="validate">
+            validate
+        </button>
+    </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
+import Model from '../model/model';
+import { extend } from 'vee-validate'
+import { required } from 'vee-validate/dist/rules'
+
+extend('required', {
+  ...required,
+  message: 'This field is required'
+});
+
+class SomeDocument extends Model {
+    constructor(
+        public DocCode: string = "",
+        public DocName: string = "",
+        public IsSomeFlag: boolean = true,
+    ) {
+        super()
+
+        this.addValidation('DocName', (v: string, m: SomeDocument) => {
+            return m.IsSomeFlag ? 'required' : '';
+        })
+    }
+}
 
 export default Vue.extend({
-  name: 'HelloWorld',
-  props: {
-    msg: String,
-  },
+    data() {
+        return {
+            someDocument: new SomeDocument(),
+        };
+    },
+    computed: {
+        rules() {
+            const [
+                value,
+                validate,
+                isDisabled,
+                model,
+            ] = (this as any).someDocument.__getFormHelpers('DocName')
+
+            return validate(value, model)
+        }
+    },
+    methods: {
+        fetchDoc() {
+            this.someDocument = new SomeDocument(
+                '12',
+                'решение суда о каком-либо действие',
+                true
+            )
+        },
+        validate() {
+            if (this.$refs.form) {
+                this.$refs.form.validate();
+            }
+        },
+    }
 });
 </script>
 
